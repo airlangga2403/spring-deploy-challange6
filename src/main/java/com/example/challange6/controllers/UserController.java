@@ -99,10 +99,13 @@ public class UserController {
 
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponseByIdDTO> getUserByID(@PathVariable UUID id) {
+    public ResponseEntity<UserResponseByIdDTO> getUserByID(@PathVariable String id) {
         try {
-            UserResponseByIdDTO userResponseByIdDTO = userService.getUserByUUID(id);
+            UUID uuid = UUID.fromString(id); // Lakukan validasi terlebih dahulu
+            UserResponseByIdDTO userResponseByIdDTO = userService.getUserByUUID(uuid);
             return ResponseEntity.ok(userResponseByIdDTO);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
