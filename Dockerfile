@@ -9,7 +9,7 @@ COPY pom.xml /home/app
 RUN apt-get update && \
     apt-get install -y maven
 
-RUN mvn -f /home/app/pom.xml clean test package
+RUN mvn -f /home/app/pom.xml clean package
 
 #
 # Package stage
