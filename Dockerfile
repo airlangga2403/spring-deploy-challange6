@@ -6,10 +6,10 @@ COPY src /home/app/src
 COPY pom.xml /home/app
 
 # Install Maven
-RUN apt-get update && \
-    apt-get install -y maven
+#RUN apt-get update && \
+#    apt-get install -y maven
 
-RUN mvn -f /home/app/pom.xml clean package
+RUN mvn -f /home/app/pom.xml clean test package
 
 #
 # Package stage
