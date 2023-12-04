@@ -1,13 +1,14 @@
 #
 # Build stage
 #
-FROM openjdk:17-jdk-slim AS build
+#FROM openjdk:17-jdk-slim AS build
+FROM maven:3.9.4-jdk-17-slim AS build
 COPY src /home/app/src
 COPY pom.xml /home/app
 
 # Install Maven
-RUN apt-get update && \
-    apt-get install -y maven
+#RUN apt-get update && \
+#    apt-get install -y maven
 
 RUN mvn -f /home/app/pom.xml clean package
 
