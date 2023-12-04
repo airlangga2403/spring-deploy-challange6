@@ -16,11 +16,12 @@ import java.util.Date;
 @Component
 public class JwtUtils {
 
-    @Value("${binarfud.app.jwtSecret}")
+    @Value("${spring.jwt.secret}")
     private String jwtSecret;
 
-    @Value("${binarfud.app.jwtExpirationMs}")
+    @Value("${spring.jwt.expiration}")
     private int jwtExpirationMs;
+
 
     public String generateToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
