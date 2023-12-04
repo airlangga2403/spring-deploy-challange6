@@ -1,27 +1,14 @@
-RUN apt-get update && \
-    apt-get install -y maven
+# Fetching latest version of Java
+FROM openjdk:17
 
-# Set the working directory in the container
+# Setting up work directory
 WORKDIR /app
 
-# Copy the Maven project files
-COPY pom.xml .
-COPY src ./src
+# Copy the jar file into our app
+COPY ./target/spring-0.0.1-SNAPSHOT.jar /app
 
-# Build the application using Maven
-RUN mvn clean package
-
-# Use a lightweight base image with Java
-FROM openjdk:17-jdk-slim AS build
-
-# Set the working directory in the container
-WORKDIR /app
-
-# Copy the JAR file from the build stage to the container
-COPY --from=build /app/target/challange6.jar ./app.jar
-
-# Expose the port the application runs on
+# Exposing port 8080
 EXPOSE 8080
 
-# Define the command to run the application
-CMD ["java", "-jar", "app.jar"]
+# Starting the application
+CMD ["java", "-jar", "spring-0.0.1-SNAPSHOT.jar"]
