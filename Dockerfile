@@ -1,17 +1,27 @@
-#
-# Build stage
-#
-#FROM openjdk:17-jdk-slim AS build
-FROM openjdk:17-jdk-slim AS build
-WORKDIR /home/app
-COPY src /home/app/src
-COPY pom.xml /home/app
 RUN apt-get update && \
     apt-get install -y maven
-RUN mvn -f /home/app/pom.xml clean package
 
-# Package stage
-FROM openjdk:17-jdk-slim
-COPY --from=build /home/app/target/challenge6-0.0.1-SNAPSHOT.jar /usr/local/lib/demo.jar
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the Maven project files
+COPY pom.xml .
+COPY src ./src
+
+# Build the application using Maven
+RUN mvn clean package
+
+# Use a lightweight base image with Java
+FROM openjdk:17-jdk-slim AS build
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the JAR file from the build stage to the container
+COPY --from=build /app/target/challange6.jar ./app.jar
+
+# Expose the port the application runs on
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/usr/local/lib/demo.jar"]
+
+# Define the command to run the application
+CMD ["java", "-jar", "app.jar"]
