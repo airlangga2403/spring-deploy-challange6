@@ -1,16 +1,19 @@
-#
+# syntax=docker/dockerfile:1.0-experimental
+
 # Build stage
-#
 FROM openjdk:17-jdk-slim AS build
-COPY src /home/app/src
-COPY pom.xml /home/app
-RUN mvn -f /home/app/pom.xml clean package
 
+WORKDIR /workspace
 
-#
+COPY . .
+
+RUN --mount=type=cache,target=/root/.m2/repository mvn -e -B clean package -Dmaven.test.skip=true
+
 # Package stage
-#
 FROM openjdk:17-jdk-slim
-COPY --from=build /home/app/target/challange6-0.0.1-SNAPSHOT.jar /usr/local/lib/demo.jar
+
+COPY --from=build /workspace/target/challange6-0.0.1-SNAPSHOT.jar /usr/local/lib/demo.jar
+
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/usr/local/lib/demo.jar"]
+
+CMD ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/usr/local/lib/demo.jar"]
