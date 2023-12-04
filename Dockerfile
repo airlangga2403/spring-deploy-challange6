@@ -1,13 +1,16 @@
-# Stage 1: Build the application
-FROM maven:3.8.4-openjdk-17-slim AS build
-WORKDIR /app
-COPY pom.xml .
-COPY src ./src
-RUN mvn clean package
+#
+# Build stage
+#
+FROM openjdk:17-jdk-slim AS build
+COPY src /home/app/src
+COPY pom.xml /home/app
+RUN mvn -f /home/app/pom.xml clean package
 
-# Stage 2: Create the final image
+
+#
+# Package stage
+#
 FROM openjdk:17-jdk-slim
-WORKDIR /app
-COPY --from=build /app/target/your-app-name.jar ./app.jar
+COPY --from=build /home/app/target/challange6-0.0.1-SNAPSHOT.jar /usr/local/lib/demo.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","/usr/local/lib/demo.jar"]
