@@ -16,12 +16,14 @@ public interface UserRepository extends JpaRepository<Users, UUID> {
     @Query("SELECT u FROM Users u WHERE u.username = :username AND u.password = :password")
     Optional<Users> findByUsernameAndPassword(@Param("username") String username, @Param("password") String password);
 
-    // UpdateNewUsername
-    @Modifying(clearAutomatically = true)
-    @Transactional
-    @Query(value = "UPDATE Users SET password = :newPassword WHERE username = :username AND password = :password", nativeQuery = true)
-    Integer updatePasswordByUsername(@Param("username") String username, @Param("password") String password, @Param("newPassword") String newPassword);
+//    // UpdateNewUsername
+//    @Modifying(clearAutomatically = true)
+//    @Transactional
+//    @Query(value = "UPDATE Users SET password = :newPassword WHERE username = :username AND password = :password", nativeQuery = true)
+//    Integer updatePasswordByUsername(@Param("username") String username, @Param("password") String password, @Param("newPassword") String newPassword);
 
 
     Optional<Users> findByUsername(String username);
+
+    Optional<Users> findByEmailAddress(String email);
 }

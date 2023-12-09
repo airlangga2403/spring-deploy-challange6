@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.savedrequest.HttpSessionRequestCache;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -38,19 +41,24 @@ public class WebSecurityConfig {
         myRequestCache.setCreateSessionAllowed(false);
 
         http
+                .securityContext(context -> context.requireExplicitSave(false))
                 .requestCache((cache) -> cache.requestCache(myRequestCache))
                 .csrf(csrf -> csrf.disable())
-                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+//                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                                 auth
+                                        .requestMatchers("/api/user/sucessfully").permitAll()
                                         .requestMatchers("/api/user/login").permitAll()
                                         .requestMatchers("/api/user/register").permitAll()
-                                        .requestMatchers("api/products").permitAll()
+                                        .requestMatchers("/api/products").permitAll()
                                         .requestMatchers("/api/merchant/**").hasRole("SELLER")
-//                            .requestMatchers("api/product/order/**").hasRole("ROLE_BUYER")
+                                        .requestMatchers("/home", "/login**","/callback/", "/webjars/**", "/error**", "/oauth2/authorization/**").permitAll()
                                         .anyRequest().authenticated()
-                );
+//                            .requestMatchers("api/product/order/**").hasRole("ROLE_BUYER")
+
+                )
+                .oauth2Login(withDefaults());
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

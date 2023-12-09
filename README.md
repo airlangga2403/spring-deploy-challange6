@@ -122,10 +122,10 @@ a new project from GitHub. You can use the following environment variables based
 
 ```properties
 spring_profiles_active=prod
-PROD_DB_HOST=monorail.proxy.rlwy.net
-PROD_DB_PORT=22190
+PROD_DB_HOST=HOST_HERE
+PROD_DB_PORT=POST_HERE
 PROD_DB_NAME=railway
-PROD_DB_PASSWORD=32C35fCF2d4362B1afa55e3C2ded6-*g
+PROD_DB_PASSWORD=PASSWORD_HERE
 PROD_DB_USERNAME=postgres
 ```
 

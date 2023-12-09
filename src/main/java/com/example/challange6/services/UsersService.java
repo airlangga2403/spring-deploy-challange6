@@ -7,6 +7,7 @@ import com.example.challange6.dto.user.response.UserResponseByIdDTO;
 import com.example.challange6.dto.user.response.UserResponseChangePW;
 import com.example.challange6.dto.user.response.UserResponseListDTO;
 import com.example.challange6.models.ERole;
+import com.example.challange6.models.EmailDetails;
 import com.example.challange6.models.Role;
 import com.example.challange6.models.Users;
 import com.example.challange6.repository.RoleRepository;
@@ -28,6 +29,9 @@ public class UsersService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private EmailService emailService;
 
 
     public UserRequestDTO registerUser(UserRequestDTO userDTO) {
@@ -62,11 +66,11 @@ public class UsersService {
         }
     }
 
-    public UserRequestDTO loginUser(UserRequestDTO userRequestDTO) {
-        Optional<Users> user = userRepository.findByUsernameAndPassword(userRequestDTO.getUsername(),
-                userRequestDTO.getPassword());
-        return user.map(this::convertToUserDTO).orElse(null);
-    }
+//    public UserRequestDTO loginUser(UserRequestDTO userRequestDTO) {
+//        Optional<Users> user = userRepository.findByUsernameAndPassword(userRequestDTO.getUsername(),
+//                userRequestDTO.getPassword());
+//        return user.map(this::convertToUserDTO).orElse(null);
+//    }
 
     public UserResponseByIdDTO getUserByUUID(UUID uuid) {
         Optional<Users> userById = userRepository.findById(uuid);
@@ -75,20 +79,38 @@ public class UsersService {
 
     // Update newUsername based By Username and Password
     public UserResponseChangePW changePwByUsername(UserRequestChangePWDTO userDTO) {
-
         UserResponseChangePW userResponse = new UserResponseChangePW();
-        if (userDTO.getNewPassword() != null && userDTO.getUsername() != null && userDTO.getPassword() != null) {
-            Integer updateUser = userRepository.updatePasswordByUsername(userDTO.getUsername(), userDTO.getPassword(),
-                    userDTO.getNewPassword());
-            if (updateUser == 1) {
-                userResponse.setMessage("SuccessFully Update Password");
-                return userResponse;
+        if (userDTO.getNewPassword() != null && userDTO.getEmail() != null && userDTO.getPassword() != null) {
+            Optional<Users> userToUpdate = userRepository.findByEmailAddress(userDTO.getEmail());
+            if (userToUpdate.isPresent()) {
+                Users user = userToUpdate.get();
+
+                // Verify the old password before updating
+                if (BCrypt.checkpw(userDTO.getPassword(), user.getPassword())) {
+                    String hashedNewPassword = BCrypt.hashpw(userDTO.getNewPassword(), BCrypt.gensalt());
+                    user.setPassword(hashedNewPassword);
+                    userRepository.save(user);
+
+                    userResponse.setMessage("Successfully updated password");
+
+                    EmailDetails email = new EmailDetails();
+                    email.setSubject("Password Update Notification");
+                    String msgBody = "Hello,\n\nYour password has been updated successfully.";
+                    email.setMsgBody(msgBody);
+                    email.setRecipient(userDTO.getEmail());
+                    emailService.sendEmail(email);
+
+                    return userResponse;
+                } else {
+                    userResponse.setMessage("Failed to update password. Incorrect current password.");
+                    return userResponse;
+                }
             } else {
-                userResponse.setMessage("Failed Update Password");
+                userResponse.setMessage("Failed to update password. User not found.");
                 return userResponse;
             }
         } else {
-            userResponse.setMessage("Failed Update Password");
+            userResponse.setMessage("Failed to update password. Incomplete data.");
             return userResponse;
         }
     }

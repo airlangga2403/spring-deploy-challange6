@@ -9,6 +9,7 @@ import com.example.challange6.dto.user.response.UserResponseChangePW;
 import com.example.challange6.dto.user.response.UserResponseDTO;
 import com.example.challange6.dto.user.response.UserResponseListDTO;
 import com.example.challange6.exception.UserRegistrationException;
+import com.example.challange6.kafka.MessageProducer;
 import com.example.challange6.security.jwt.JwtUtils;
 import com.example.challange6.security.service.UserDetailsImpl;
 import com.example.challange6.services.InvoiceService;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -41,14 +43,15 @@ public class UserController {
     private final InvoiceService invoiceService;
     private AuthenticationManager authenticationManager;
     private JwtUtils jwtUtils;
+    private final MessageProducer messageProducer;
 
     @Autowired
-    public UserController(UsersService userService, InvoiceService invoiceService, AuthenticationManager authenticationManager, JwtUtils jwtUtils) {
+    public UserController(UsersService userService, InvoiceService invoiceService, AuthenticationManager authenticationManager, JwtUtils jwtUtils, MessageProducer messageProducer) {
         this.userService = userService;
         this.invoiceService = invoiceService;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
-
+        this.messageProducer = messageProducer;
     }
 
     @PostMapping("/register")
@@ -90,6 +93,10 @@ public class UserController {
                 log.warn("Login failed for user: {}", userDTO.getUsername());
                 return ResponseEntity.ok(new UserResponseDTO(null, "Login failed. Invalid credentials.", null));
             }
+        } catch (BadCredentialsException e) {
+            log.warn("Login failed due to bad credentials for user: {}", userDTO.getUsername());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new UserResponseDTO(null, "Login failed. Invalid credentials.", null));
         } catch (Exception e) {
             log.error("Internal server error while processing login for user: {}", userDTO.getUsername(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -112,12 +119,12 @@ public class UserController {
     }
 
     @PutMapping("")
-    public ResponseEntity<UserResponseChangePW> updateUserPasswordByUsername(@RequestBody UserRequestChangePWDTO userDTO) {
+    public ResponseEntity<UserResponseChangePW> updateUserPasswordByEmail(@RequestBody UserRequestChangePWDTO userDTO) {
         try {
             UserResponseChangePW userChangePW = userService.changePwByUsername(userDTO);
             return ResponseEntity.ok(userChangePW);
         } catch (Exception e) {
-            log.error("Internal server error while processing login for user: {}", userDTO.getUsername(), e);
+            log.error("Internal server error while processing login for user: {}", userDTO.getEmail(), e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new UserResponseChangePW("Internal server error " + e.getMessage()));
         }
     }

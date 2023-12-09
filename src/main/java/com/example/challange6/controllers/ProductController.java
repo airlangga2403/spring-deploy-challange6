@@ -68,14 +68,14 @@ public class ProductController {
         Integer offset = (page - 1) * size;
         List<Products> listProducts = productService.getAllProducts(offset, size);
 
-        if (listProducts != null) {
-            log.info("Response from getAllProduct: {}", listProducts);
-            return new ResponseEntity<>(listProducts, HttpStatus.OK);
-        } else {
+        if (listProducts.isEmpty()) {
             log.error("Products not found.");
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("message", "Product not found");
-            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
+            errorResponse.put("message", "Product Empty");
+            return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        } else {
+            log.info("Response from getAllProduct: {}", listProducts);
+            return new ResponseEntity<>(listProducts, HttpStatus.OK);
         }
     }
 

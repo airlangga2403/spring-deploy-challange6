@@ -10,7 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserRequestChangePWDTO {
-    private String username;
+    private String email;
     private String password;
     private String newPassword;
 }

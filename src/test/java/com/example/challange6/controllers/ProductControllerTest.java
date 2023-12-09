@@ -13,12 +13,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @RunWith(MockitoJUnitRunner.class)
@@ -58,7 +57,7 @@ public class ProductControllerTest {
 
         List<Products> mockProducts = Arrays.asList(product1, product2);
 
-        Mockito.when(productService.getAllProducts(Mockito.anyInt(), Mockito.anyInt()))
+        when(productService.getAllProducts(anyInt(), anyInt()))
                 .thenReturn(mockProducts);
 
         ResponseEntity<?> responseEntity = productController.getAllProduct(1, 10);
@@ -73,4 +72,18 @@ public class ProductControllerTest {
             System.out.println("Product ID: " + product.getId() + ", Product Name: " + product.getProductName());
         }
     }
+    @Test
+    public void testGetAllProduct_Failure() {
+        when(productService.getAllProducts(anyInt(), anyInt())).thenReturn(Collections.emptyList());
+
+        ResponseEntity<?> response = productController.getAllProduct(1, 10);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertTrue(response.getBody() instanceof Map);
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> responseBody = (Map<String, Object>) response.getBody();
+        assertEquals("Product Empty", responseBody.get("message"));
+    }
+
 }
