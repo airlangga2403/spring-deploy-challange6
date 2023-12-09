@@ -43,11 +43,10 @@ public class WebSecurityConfig {
                 .securityContext(context -> context.requireExplicitSave(false))
                 .requestCache((cache) -> cache.requestCache(myRequestCache))
                 .csrf(csrf -> csrf.disable())
-//                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                                 auth
-                                        .requestMatchers("/api/user/sucessfully").permitAll()
                                         .requestMatchers("/api/user/login").permitAll()
                                         .requestMatchers("/api/user/register").permitAll()
                                         .requestMatchers("/api/products").permitAll()
