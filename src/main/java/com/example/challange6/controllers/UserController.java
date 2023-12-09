@@ -9,7 +9,6 @@ import com.example.challange6.dto.user.response.UserResponseChangePW;
 import com.example.challange6.dto.user.response.UserResponseDTO;
 import com.example.challange6.dto.user.response.UserResponseListDTO;
 import com.example.challange6.exception.UserRegistrationException;
-import com.example.challange6.kafka.MessageProducer;
 import com.example.challange6.security.jwt.JwtUtils;
 import com.example.challange6.security.service.UserDetailsImpl;
 import com.example.challange6.services.InvoiceService;
@@ -43,15 +42,13 @@ public class UserController {
     private final InvoiceService invoiceService;
     private AuthenticationManager authenticationManager;
     private JwtUtils jwtUtils;
-    private final MessageProducer messageProducer;
 
     @Autowired
-    public UserController(UsersService userService, InvoiceService invoiceService, AuthenticationManager authenticationManager, JwtUtils jwtUtils, MessageProducer messageProducer) {
+    public UserController(UsersService userService, InvoiceService invoiceService, AuthenticationManager authenticationManager, JwtUtils jwtUtils ) {
         this.userService = userService;
         this.invoiceService = invoiceService;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
-        this.messageProducer = messageProducer;
     }
 
     @PostMapping("/register")
