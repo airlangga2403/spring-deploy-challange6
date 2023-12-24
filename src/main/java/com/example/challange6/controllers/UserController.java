@@ -2,6 +2,8 @@ package com.example.challange6.controllers;
 
 
 import com.example.challange6.dto.user.JwtResponse;
+import com.example.challange6.dto.user.request.OtpRequest;
+import com.example.challange6.dto.user.request.OtpValidationRequest;
 import com.example.challange6.dto.user.request.UserRequestChangePWDTO;
 import com.example.challange6.dto.user.request.UserRequestDTO;
 import com.example.challange6.dto.user.response.UserResponseByIdDTO;
@@ -9,9 +11,11 @@ import com.example.challange6.dto.user.response.UserResponseChangePW;
 import com.example.challange6.dto.user.response.UserResponseDTO;
 import com.example.challange6.dto.user.response.UserResponseListDTO;
 import com.example.challange6.exception.UserRegistrationException;
+import com.example.challange6.models.Users;
 import com.example.challange6.security.jwt.JwtUtils;
 import com.example.challange6.security.service.UserDetailsImpl;
 import com.example.challange6.services.InvoiceService;
+import com.example.challange6.services.OtpService;
 import com.example.challange6.services.UsersService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +36,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 @RestController
 @Slf4j
@@ -43,12 +49,62 @@ public class UserController {
     private AuthenticationManager authenticationManager;
     private JwtUtils jwtUtils;
 
+    private OtpService otpService;
+
     @Autowired
-    public UserController(UsersService userService, InvoiceService invoiceService, AuthenticationManager authenticationManager, JwtUtils jwtUtils ) {
+    public UserController(UsersService userService, InvoiceService invoiceService, AuthenticationManager authenticationManager, JwtUtils jwtUtils, OtpService otpService ) {
         this.userService = userService;
         this.invoiceService = invoiceService;
         this.authenticationManager = authenticationManager;
         this.jwtUtils = jwtUtils;
+        this.otpService = otpService;
+    }
+
+
+
+    @PostMapping("/generate-otp")
+    public ResponseEntity<?> generateOtp(@RequestBody OtpRequest otpRequest) {
+        String accountNumber = otpRequest.getAccountNumber();
+
+        // Fetch the user by account number to get the associated email
+        UUID uuid = UUID.fromString(accountNumber);
+        Users user = userService.getUserForOTPbyUUID(uuid);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found for the given account number");
+        }
+
+        // Generate OTP and save it in the database
+        String otp = otpService.generateOTP(accountNumber);
+
+        // Send the OTP to the user's email address asynchronously
+        CompletableFuture<Boolean> emailSendingFuture = otpService.sendOTPByEmail(user.getEmailAddress(), user.getUsername(), accountNumber, otp);
+
+        // Wait for the email sending process to complete and handle the response
+        try {
+            boolean otpSent = emailSendingFuture.get(); // This will block until the email sending is complete
+
+            if (otpSent) {
+                // Return JSON response with success message
+                return ResponseEntity.ok().body("{\"message\": \"OTP sent successfully\"}");
+            } else {
+                // Return JSON response with error message
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\": \"Failed to send OTP\"}");
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            // Return JSON response with error message
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("{\"message\": \"Failed to send OTP\"}");
+        }
+    }
+
+    @PostMapping("/validate-otp")
+    public ResponseEntity<?> validateOtp(@RequestBody OtpValidationRequest otp) {
+        boolean validate = otpService.validateOTP(otp);
+        if (validate){
+            return ResponseEntity.ok("Sukses");
+        } else {
+            return ResponseEntity.ok("Failed");
+        }
     }
 
     @PostMapping("/register")
@@ -115,10 +171,11 @@ public class UserController {
         }
     }
 
-    @PutMapping("")
+    // forgotPasswordbyEmail
+    @PutMapping("/forgot-password")
     public ResponseEntity<UserResponseChangePW> updateUserPasswordByEmail(@RequestBody UserRequestChangePWDTO userDTO) {
         try {
-            UserResponseChangePW userChangePW = userService.changePwByUsername(userDTO);
+            UserResponseChangePW userChangePW = userService.changePwByEmail(userDTO);
             return ResponseEntity.ok(userChangePW);
         } catch (Exception e) {
             log.error("Internal server error while processing login for user: {}", userDTO.getEmail(), e);

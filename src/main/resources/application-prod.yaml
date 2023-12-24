@@ -1,39 +1,42 @@
-#spring:
-#  datasource:
-#    url: jdbc:postgresql://${PROD_DB_HOST}:${PROD_DB_PORT}/${PROD_DB_NAME}
-#    username: ${PROD_DB_USERNAME}
-#    password: ${PROD_DB_PASSWORD}
-#    name: binarfud-challange6
-#
-#  sql:
-#    init:
-#      mode: always
-#
-#  mail:
-#    host: smtp.gmail.com
-#    port: 587
-#    username: depanbelakang944@gmail.com
-#    password: bglxmoxhroikcpua
-#    properties:
-#      mail:
-#        smtp:
-#          auth: true
-#          starttls:
-#            enable: true
-#          connectiontimeout: 5000
-#          timeout: 5000
-#          writetimeout: 5000
-#
-#
-#  security:
-#    oauth2:
-#      client:
-#        registration:
-#          github:
-#            client-id: 2a81eba9b378a3795f05
-#            client-secret: 0418b60668b66239e8039b559e0fecbe0cdba998
-#
-#binarfud:
-#  app:
-#    jwtSecret: ${JWT_SECRET}
-#    jwtExpirationMs: ${JWT_EXPIRATION_MS}
+spring:
+  datasource:
+    url: jdbc:postgresql://${PROD_DB_HOST}:${PROD_DB_PORT}/${PROD_DB_NAME}
+    username: ${PROD_DB_USERNAME}
+    password: ${PROD_DB_PASSWORD}
+    name: binarfud-challange6
+
+
+  sql:
+    init:
+      mode: always
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: depanbelakang944@gmail.com
+    password: bglxmoxhroikcpua
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+
+
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: 2a81eba9b378a3795f05
+            client-secret: 0418b60668b66239e8039b559e0fecbe0cdba998
+
+binarfud:
+  app:
+    jwtSecret: ${JWT_SECRET}
+    jwtExpirationMs: ${JWT_EXPIRATION_MS}
