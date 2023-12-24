@@ -1,10 +1,8 @@
 package com.example.challange6.services;
 
-import com.example.challange6.models.EmailDetails;
+import java.util.concurrent.CompletableFuture;
 
 public interface EmailService {
-    String sendEmail(EmailDetails emailDetails);
-
-    // send with attachment
-    String sendEmailWithAttachment(EmailDetails emailDetails);
+    public CompletableFuture<Void> sendEmail(String to, String subject, String text);
+    public String getOtpLoginEmailTemplate(String name,String accountNumber, String otp) ;
 }

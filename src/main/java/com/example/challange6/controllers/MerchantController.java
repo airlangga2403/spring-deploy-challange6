@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 @RestController
 @Slf4j
+@PreAuthorize("hasRole('merchant')")
 @RequestMapping("api/merchant")
 public class MerchantController {
 
@@ -35,6 +37,7 @@ public class MerchantController {
     private InvoiceService invoiceService;
 
     @PostMapping("/add")
+
     public AddMerchantResponseDTO addMerchant(@RequestBody AddMerchantRequestDTO requestDTO) {
         log.info("Received a request to add a merchant.");
         AddMerchantResponseDTO responseDTO = merchantService.addMerchant(requestDTO);

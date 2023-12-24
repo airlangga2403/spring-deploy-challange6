@@ -51,6 +51,8 @@ public class WebSecurityConfig {
                                         .requestMatchers("/api/user/register").permitAll()
                                         .requestMatchers("/api/products").permitAll()
                                         .requestMatchers("/api/merchant/**").hasRole("SELLER")
+                                        .requestMatchers("/api/user/generate-otp").permitAll()
+                                        .requestMatchers("/api/user/validate-otp").permitAll()
                                         .requestMatchers("/home", "/login**","/callback/", "/webjars/**", "/error**", "/oauth2/authorization/**").permitAll()
                                         .anyRequest().authenticated()
 //                            .requestMatchers("api/product/order/**").hasRole("ROLE_BUYER")

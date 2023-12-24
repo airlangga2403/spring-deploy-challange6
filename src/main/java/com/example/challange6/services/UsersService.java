@@ -72,18 +72,31 @@ public class UsersService {
 //        return user.map(this::convertToUserDTO).orElse(null);
 //    }
 
+    public Users getUserForOTPbyUUID(UUID uuid){
+        Optional<Users> userById = userRepository.findById(uuid);
+        if (userById.isEmpty()){
+            return null;
+        } else {
+            return userById.get();
+        }
+
+    }
     public UserResponseByIdDTO getUserByUUID(UUID uuid) {
         Optional<Users> userById = userRepository.findById(uuid);
         return userById.map(this::convertToUserResponseByUUID).orElse(null);
     }
 
     // Update newUsername based By Username and Password
-    public UserResponseChangePW changePwByUsername(UserRequestChangePWDTO userDTO) {
+    public UserResponseChangePW changePwByEmail(UserRequestChangePWDTO userDTO) {
         UserResponseChangePW userResponse = new UserResponseChangePW();
         if (userDTO.getNewPassword() != null && userDTO.getEmail() != null && userDTO.getPassword() != null) {
             Optional<Users> userToUpdate = userRepository.findByEmailAddress(userDTO.getEmail());
             if (userToUpdate.isPresent()) {
                 Users user = userToUpdate.get();
+
+                // todo
+                // give OTP
+                // -> validate otp
 
                 // Verify the old password before updating
                 if (BCrypt.checkpw(userDTO.getPassword(), user.getPassword())) {
@@ -93,12 +106,13 @@ public class UsersService {
 
                     userResponse.setMessage("Successfully updated password");
 
-                    EmailDetails email = new EmailDetails();
-                    email.setSubject("Password Update Notification");
-                    String msgBody = "Hello,\n\nYour password has been updated successfully.";
-                    email.setMsgBody(msgBody);
-                    email.setRecipient(userDTO.getEmail());
-                    emailService.sendEmail(email);
+//                    EmailDetails email = new EmailDetails();
+//                    email.setSubject("Password Update Notification");
+//                    String msgBody = "Hello,\n\nYour password has been updated successfully.";
+//                    email.setMsgBody(msgBody);
+//                    email.setRecipient(userDTO.getEmail());
+                    // todo
+//                    emailService.sendEmail(email);
 
                     return userResponse;
                 } else {
